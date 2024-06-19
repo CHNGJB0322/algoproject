@@ -1,0 +1,85 @@
+import java.util.*;
+class Coordinate {
+    int x, y;
+
+    Coordinate(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + x + ", " + y + ")";
+    }
+}
+
+class Route {
+    Coordinate start, end;
+    int time;
+
+    Route(Coordinate start, Coordinate end, int time) {
+        this.start = start;
+        this.end = end;
+        this.time = time;
+    }
+
+    @Override
+    public String toString() {
+        return "Route from " + start + " to " + end + " takes " + time + " time units.";
+    }
+}
+
+public class EvacuationPlanning {
+    private List<Coordinate> shelters;
+    private int[][] roadConditions;
+    private Coordinate[] affectedAreas;
+
+    public EvacuationPlanning(List<Coordinate> shelters, int[][] roadConditions, Coordinate[] affectedAreas) {
+        this.shelters = shelters;
+        this.roadConditions = roadConditions;
+        this.affectedAreas = affectedAreas;
+    }
+
+    public void planEvacuation() {
+        for (Coordinate area : affectedAreas) {
+            List<Route> allRoutes = findAllRoutes(area);
+            for (Route route : allRoutes) {
+                System.out.println(route);
+            }
+            Route bestRoute = findShortestRoute(allRoutes);
+            System.out.println("Chosen " + bestRoute + "\n");
+        }
+    }
+
+    private List<Route> findAllRoutes(Coordinate area) {
+        List<Route> allRoutes = new ArrayList<>();
+        for (Coordinate shelter : shelters) {
+            int time = calculateRouteTime(area, shelter);
+            allRoutes.add(new Route(area, shelter, time));
+        }
+        return allRoutes;
+    }
+
+    private Route findShortestRoute(List<Route> routes) {
+        return routes.stream().min(Comparator.comparingInt(route -> route.time)).orElse(null);
+    }
+
+    private int calculateRouteTime(Coordinate start, Coordinate end) {
+        // Use Manhattan distance as a base time calculation
+        int baseTime = Math.abs(start.x - end.x) + Math.abs(start.y - end.y);
+        // Add an additional time factor to differentiate similar distances
+        Random rand = new Random();
+        int additionalTime = rand.nextInt(10); // Add a random factor between 0 and 9
+        return baseTime + additionalTime;
+    }
+
+    public static void main(String[] args) {
+        // Initialize coordinates and conditions
+        List<Coordinate> shelters = Arrays.asList(new Coordinate(0, 0), new Coordinate(10, 10), new Coordinate(20, 20), new Coordinate(5, 10), new Coordinate(15, 5));
+        int[][] roadConditions = new int[25][25];  // Placeholder, not used in current implementation
+        Coordinate[] affectedAreas = {new Coordinate(5, 5), new Coordinate(15, 15)};
+
+        EvacuationPlanning planning = new EvacuationPlanning(shelters, roadConditions, affectedAreas);
+        planning.planEvacuation();
+    }
+}
